@@ -4,25 +4,39 @@ import csv
 import time
 from urllib.parse import urljoin
 
+def get_all_categories(base_url):
+    response = requests.get(base_url)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    categories = []
+    category_section = soup.find('ul', class_='nav-list')
+    category_links = category_section.find_all('a')[1:]  
+    
+    for link in category_links:
+        category_name = link.text.strip()
+        category_url = urljoin(base_url, link['href'])
+        categories.append((category_name, category_url))
+    
+    return categories
+
 def get_book_links(category_url):
     book_links = []
     while category_url:
         response = requests.get(category_url)
         soup = BeautifulSoup(response.text, 'html.parser')
-
+        # Find all book links on the current page
         book_containers = soup.find_all('article', class_='product_pod')
         for container in book_containers:
             relative_link = container.find('h3').find('a')['href']
-           
             full_link = urljoin(category_url, relative_link)
             book_links.append(full_link)
 
+        
         next_button = soup.find('li', class_='next')
         if next_button:
             next_page_url = next_button.find('a')['href']
             category_url = urljoin(category_url, next_page_url)
         else:
-            category_url = None  
+            category_url = None 
     return book_links
 
 def extract_book_data(book_url):
@@ -50,26 +64,25 @@ def extract_book_data(book_url):
     return [product_page_url, upc, book_title, price_including_tax, price_excluding_tax,
             quantity_available, product_description, category, review_rating, image_url]
 
+base_url = 'http://books.toscrape.com/'
+categories = get_all_categories(base_url)
 
-category_url = 'http://books.toscrape.com/catalogue/category/books/travel_2/index.html'
-book_links = get_book_links(category_url)
+for category_name, category_url in categories:
+    print(f"Processing category: {category_name}")
+    book_links = get_book_links(category_url)
+    csv_file = f"{category_name.replace(' ', '_').lower()}_books_data.csv"
+    with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['product_page_url', 'universal_product_code (upc)', 'book_title', 'price_including_tax',
+                         'price_excluding_tax', 'quantity_available', 'product_description', 'category',
+                         'review_rating', 'image_url'])
+        for book_link in book_links:
+            print(f"Processing book: {book_link}")
+            book_data = extract_book_data(book_link)
+            if book_data:
+                writer.writerow(book_data)
+            time.sleep(1)
 
-csv_file = 'travel_books_data.csv'
+    print(f"Data for category '{category_name}' has been written to {csv_file}")
 
-
-with open(csv_file, 'w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-
-    writer.writerow(['product_page_url', 'universal_product_code (upc)', 'book_title', 'price_including_tax',
-                     'price_excluding_tax', 'quantity_available', 'product_description', 'category',
-                     'review_rating', 'image_url'])
-    
-  
-    for book_link in book_links:
-        print(f"Processing book: {book_link}")
-        book_data = extract_book_data(book_link)
-        if book_data:  
-            writer.writerow(book_data)
-        time.sleep(1)  
-
-print(f"Data for all books in the category has been written to {csv_file}")
+print("Data extraction for all categories is complete.")
