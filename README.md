@@ -13,11 +13,9 @@ Ensure you have Python 3.8 or higher installed on your device.
 - Extracting all categoires of books data and separating each category into its own csv file.
 - Extracting all image URL's and allowing you to download them if desired.
 
-## Setup Instructions
+## Setup Instructions.
 
-How to get set up 
-
-### 1. Clone the Repository
+### 1. Clone the Repository.
 
 Run the followng:
 
@@ -26,7 +24,7 @@ git clone <repository_url>
 cd <repository_directory>
 ```
 
-### 2. Installing libaries  
+### 2. Installing libaries.  
 
 Run the following:
 
@@ -40,7 +38,7 @@ pip install requests
 pip install beautifulsoup4 
 ```
 
-### 3. Running the Enviroment 
+### 3. Running the project. 
 
 Running the following code will extract and store the data from the given URL of any book you desire.
 
@@ -66,7 +64,7 @@ Running the following code will extract and store the data of all image URL's.
 python scrape_all_images.py
 ```
 
-### 4. Stopping the Enviroment
+### 4. Stopping the project.
 
 To stop the process of the eniroment before it stops on it's own. Press the follwoing keys:
-'ctrl' 'c'
+'ctrl' + 'c'. if you are on MacOS, Press the following keys: 'commad + 'c'.
